@@ -43,7 +43,7 @@ export function sveltePlugin(options = {}) {
         setup(build) {
             const o = build.initialOptions
             const dev = options.dev ?? process.env.NODE_ENV !== "production"
-            const conditions = ["svelte-custom-renderer", ...(dev ? ["development"] : [])]
+            const conditions = ["svelte-custom-renderer", dev ? "development" : "production"]
             o.conditions = [...new Set([...(o.conditions ?? []), ...conditions])]
             o.resolveExtensions = [...new Set([...(o.resolveExtensions ?? [".tsx", ".ts", ".jsx", ".js", ".css", ".json"]), ".svelte"])]
             const root = o.absWorkingDir ?? process.cwd()

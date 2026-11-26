@@ -26,7 +26,14 @@ describe("sveltePlugin", () => {
     it("builds Svelte's development build when dev, the production one when not", async () => {
         const dev = await buildFixture("app", { dev: true })
         const prod = await buildFixture("app", { dev: false })
-        expect(Object.keys(dev.metafile.inputs).some((p) => p.includes("esm-env/dev-browser") || p.includes("esm-env/true"))).toBe(true)
+        // Svelte's DEV is esm-env's, which re-exports it from "esm-env/development":
+        // true.js, false.js, or dev-fallback.js reading NODE_ENV at run time
+        const devFlag = (m: typeof dev.metafile) => {
+            const index = Object.entries(m.inputs).find(([p]) => p.endsWith("esm-env/index.js"))![1]
+            return index.imports.find((i) => i.original === "esm-env/development")!.path.split("/").pop()
+        }
+        expect(devFlag(dev.metafile)).toBe("true.js")
+        expect(devFlag(prod.metafile)).toBe("false.js")
         expect(dev.code.length).toBeGreaterThan(prod.code.length)
     })
 
