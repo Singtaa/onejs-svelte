@@ -43,6 +43,13 @@ jobs:
         with:
           node-version: 22
 
+      # A file: link is a symlink, and TypeScript and Vite resolve the linked
+      # package's own imports (vitest, unity-types) from its real folder: the
+      # sibling needs its dependencies installed, as it has them in the container.
+      # Installed from npm it is a real copy, and resolves them from the app.
+      - run: npm ci
+        working-directory: onejs-elements
+
       - run: npm ci
 
       - name: Swap in svelte@latest

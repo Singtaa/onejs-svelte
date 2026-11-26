@@ -124,8 +124,9 @@ the same app in a Unity editor (its `SvelteChecks` PlayMode test).
 ## Releasing
 
 Bump `package.json`, push `main`, wait for CI, then push a tag `v<version>`:
-`.github/workflows/publish.yml` publishes through npm trusted publishing, so no
-token exists anywhere. 0.1.0 was published by hand, because npm attaches a
+`.github/workflows/publish.yml` runs CI on Ubuntu, Windows and macOS for the
+tagged commit and publishes only when all three pass, through npm trusted
+publishing, so no token exists anywhere. 0.1.0 was published by hand, because npm attaches a
 trusted publisher only to a package that already exists.
 
 In the OneJS container this package is checked out at `JSModules/onejs-svelte`

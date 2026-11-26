@@ -25,8 +25,13 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # The whole CI matrix, on the tagged commit: a publish waits for all three OSes
+  ci:
+    uses: ./.github/workflows/ci.yml
+
   publish:
     name: publish to npm
+    needs: ci
     runs-on: ubuntu-latest
 
     defaults:
@@ -80,6 +85,13 @@ jobs:
             echo "onejs-svelte@$pkg_version is already on npm; running the gates and publishing nothing."
             echo "published=true" >> "$GITHUB_OUTPUT"
           fi
+
+      # A file: link is a symlink, and TypeScript and Vite resolve the linked
+      # package's own imports (vitest, unity-types) from its real folder: the
+      # sibling needs its dependencies installed, as it has them in the container.
+      # Installed from npm it is a real copy, and resolves them from the app.
+      - run: npm ci
+        working-directory: onejs-elements
 
       - run: npm ci
 

@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+  # publish.yml runs this as its gate: nothing publishes unless every OS passes
+  workflow_call:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -18,8 +20,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Windows is a gate: developers here work on it.
-        os: [ubuntu-latest, windows-latest]
+        # Windows is a gate: developers here work on it. macOS is one too:
+        # the editor runs there as well.
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     defaults:
       run:
@@ -49,7 +52,16 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: onejs-svelte/package-lock.json
+          cache-dependency-path: |
+            onejs-svelte/package-lock.json
+            onejs-elements/package-lock.json
+
+      # A file: link is a symlink, and TypeScript and Vite resolve the linked
+      # package's own imports (vitest, unity-types) from its real folder: the
+      # sibling needs its dependencies installed, as it has them in the container.
+      # Installed from npm it is a real copy, and resolves them from the app.
+      - run: npm ci
+        working-directory: onejs-elements
 
       - run: npm ci
 
