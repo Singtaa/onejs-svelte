@@ -86,6 +86,7 @@ const AGENTS_SECTION = `
 - Tags are UI Toolkit elements: \`<view>\`, \`<label text="...">\`, \`<button onclick={...}>\`, \`<textfield value={v} onchange={(e) => v = e.value}>\`.
 - Svelte refuses these under OneJS: \`bind:\` on an element (\`bind:this\` too), \`transition:\`, \`animate:\`, \`on:click\`, \`{@html}\`, \`<svelte:window>\`. \`bind:\` on a component prop works.
 - onejs-unity's \`.\`, \`input\`, \`gpu\`, \`fx\` and \`proc\` need React; \`assets\`, \`audio\`, \`interop\`, \`sl\` and \`physics2d\` do not.
+- Tailwind: \`import "onejs:tailwind"\` once in \`index.ts\`; \`esbuild.config.mjs\` already scans \`.svelte\` files for classes.
 - \`npm run typecheck\` runs svelte-check.
 `
 

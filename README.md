@@ -59,7 +59,7 @@ render(App, __root)
 Runes, components and their `bind:` props, `{#if}`, keyed `{#each}`,
 `{#await}`, `{#key}`, snippets, `use:` actions, `{@attach}`, `class:`,
 `style:`, scoped `<style>` (registered as USS), stores, TypeScript, Tailwind
-classes, and hot reload (state resets; `$effect` cleanups run).
+classes (`import "onejs:tailwind"` once in `index.ts`, as in a React app), and hot reload (state resets; `$effect` cleanups run).
 
 Tags are onejs-react's without `ojs-`: `view`, `text`, `label`, `button`,
 `textfield`, `toggle`, `slider`, `scrollview`, `image`, `listview`, `treeview`,
