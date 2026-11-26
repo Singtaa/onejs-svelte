@@ -92,6 +92,17 @@ describe("render", () => {
         expect(cls.ClassListContains(scopeClass())).toBe(true)
     })
 
+    it("merges style= with style: and gives unitless values as numbers", async () => {
+        const sty = app.byName("sty")
+        expect(sty.style.height).toEqual({ value: 7, unit: 0 })
+        expect(sty.style.width).toEqual({ value: 13, unit: 0 })
+        expect(sty.style.flexShrink).toBe(0)
+        expect(sty.style.opacity).toBe(0.5)
+        await app.fire(app.byName("inc"), "click")
+        expect(sty.style.width).toEqual({ value: 14, unit: 0 })
+        expect(sty.style.height).toEqual({ value: 7, unit: 0 })
+    })
+
     it("hands a use: action and an {@attach} the node, whose element is the VisualElement", () => {
         const el = app.byName("action")
         expect(el.tooltip).toBe("from action")

@@ -69,14 +69,17 @@ function attachHost(n: Node) {
     else hostConfig.appendChild(hp.inst!, n.inst!)
 }
 
-// style="width: 10px; flex-grow: 1" as the style object onejs-elements takes
-function parseStyle(css: string): Record<string, string> {
-    const out: Record<string, string> = {}
+// style="width: 10px; flex-grow: 1" as the style object onejs-elements takes.
+// A unitless value is a number, as a React style gives it: onejs-elements
+// passes flexGrow, opacity and the like through as they come.
+function parseStyle(css: string): Record<string, string | number> {
+    const out: Record<string, string | number> = {}
     for (const decl of css.split(";")) {
         const i = decl.indexOf(":")
         if (i < 0) continue
         const key = decl.slice(0, i).trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase())
-        out[key] = decl.slice(i + 1).trim()
+        const value = decl.slice(i + 1).trim()
+        out[key] = /^-?(\d+\.?\d*|\.\d+)$/.test(value) ? Number(value) : value
     }
     return out
 }

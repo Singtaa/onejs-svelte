@@ -48,7 +48,7 @@
     <button name="store" text="store" onclick={() => store.update((n) => n + 1)} />
     <label name="store-echo" text={`store ${$store}`} />
     <view name="cls" class:active={count > 3} />
-    <view name="sty" style:width={`${10 + count}px`} style="height: 7px" />
+    <view name="sty" style:width={`${10 + count}px`} style="height: 7px; flex-shrink: 0; opacity: .5" />
     <label name="interp">Count is {count}</label>
     <view name="action" use:tip={"from action"} {@attach mark} />
     {@render badge("ok")}
