@@ -54,8 +54,6 @@ interface OneJSElementAttributes {
     ontransitionstart?: Handler<TransitionEventData>
     ontransitionend?: Handler<TransitionEventData>
     ontransitioncancel?: Handler<TransitionEventData>
-    // Any other property of the C# element is set as written
-    [property: string]: unknown
 }
 
 interface TextAttributes extends OneJSElementAttributes { text?: string }
@@ -66,21 +64,50 @@ interface FieldAttributes<T> extends OneJSElementAttributes {
     onchange?: Handler<ChangeEventData<T>>
 }
 
+// The props onejs-elements applies to each element, as onejs-react's
+// ViewProps, TextFieldProps, ... type them. ListView and TreeView are left
+// out: their rows are React components in onejs-react, and a Svelte app
+// renders a list with a keyed {#each} inside a <scrollview>.
+// svelte-check reads an attribute name on a lowercase tag in lowercase, as
+// HTML's are, so the keys it checks against are lowercased here. The compiled
+// component keeps the case as written (lowValue), which is what UI Toolkit needs.
+type Checked<T> = { [K in keyof T as Lowercase<K & string>]: T[K] }
+
+type Visibility = "Auto" | "AlwaysVisible" | "Hidden"
+type Rect = { x: number; y: number; width: number; height: number }
+
 declare global {
     namespace svelteHTML {
         interface IntrinsicElements {
-            view: OneJSElementAttributes
-            text: TextAttributes
-            label: TextAttributes
-            button: TextAttributes
-            textfield: FieldAttributes<string> & { multiline?: boolean; readOnly?: boolean; maxLength?: number; isPasswordField?: boolean }
-            toggle: FieldAttributes<boolean> & { text?: string }
-            slider: FieldAttributes<number> & { lowValue?: number; highValue?: number; showInputField?: boolean }
-            scrollview: OneJSElementAttributes & { mouseWheelScrollSize?: number }
-            image: OneJSElementAttributes
-            listview: OneJSElementAttributes
-            treeview: OneJSElementAttributes
-            frostedglass: OneJSElementAttributes & { blurRadius?: number }
+            view: Checked<OneJSElementAttributes>
+            text: Checked<TextAttributes>
+            label: Checked<TextAttributes>
+            button: Checked<TextAttributes>
+            textfield: Checked<FieldAttributes<string> & {
+                placeholder?: string; multiline?: boolean; readOnly?: boolean; maxLength?: number
+                isPasswordField?: boolean; maskChar?: string; isDelayed?: boolean
+                selectAllOnFocus?: boolean; selectAllOnMouseUp?: boolean; hideMobileInput?: boolean; autoCorrection?: boolean
+                inputClassName?: string
+            }>
+            toggle: Checked<FieldAttributes<boolean> & { text?: string; toggleOnLabelClick?: boolean }>
+            slider: Checked<FieldAttributes<number> & {
+                min?: number; max?: number; lowValue?: number; highValue?: number
+                direction?: "Horizontal" | "Vertical"; pageSize?: number; showInputField?: boolean; inverted?: boolean; fill?: boolean
+            }>
+            scrollview: Checked<OneJSElementAttributes & {
+                mode?: "Vertical" | "Horizontal" | "VerticalAndHorizontal"
+                horizontalScrollerVisibility?: Visibility; verticalScrollerVisibility?: Visibility
+                elasticity?: number; elasticAnimationIntervalMs?: number; scrollDecelerationRate?: number
+                mouseWheelScrollSize?: number; horizontalPageSize?: number; verticalPageSize?: number
+                touchScrollBehavior?: "Unrestricted" | "Elastic" | "Clamped"
+                nestedInteractionKind?: "Default" | "StopScrolling" | "ForwardScrolling"
+            }>
+            image: Checked<OneJSElementAttributes & {
+                src?: string; image?: object; sprite?: object
+                scaleMode?: "StretchToFill" | "ScaleAndCrop" | "ScaleToFit"; tintColor?: string
+                sourceRect?: Rect; uv?: Rect
+            }>
+            frostedglass: Checked<OneJSElementAttributes & { blurRadius?: number; tintColor?: unknown }>
         }
     }
 }

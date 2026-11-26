@@ -84,6 +84,7 @@ const AGENTS_SECTION = `
 - The entry is \`index.ts\`, ending with \`render(App, __root)\` from \`onejs-svelte\`. Components are \`.svelte\` files.
 - \`esbuild.config.mjs\` keeps \`sveltePlugin()\` from \`onejs-svelte/esbuild\` in its plugins.
 - Tags are UI Toolkit elements: \`<view>\`, \`<label text="...">\`, \`<button onclick={...}>\`, \`<textfield value={v} onchange={(e) => v = e.value}>\`.
+- A quoted value is a string and a bare attribute is \`""\`: numbers and booleans go in braces (\`maxLength={5}\`, \`multiline={true}\`).
 - Svelte refuses these under OneJS: \`bind:\` on an element (\`bind:this\` too), \`transition:\`, \`animate:\`, \`on:click\`, \`{@html}\`, \`<svelte:window>\`. \`bind:\` on a component prop works.
 - onejs-unity's \`.\`, \`input\`, \`gpu\`, \`fx\` and \`proc\` need React; \`assets\`, \`audio\`, \`interop\`, \`sl\` and \`physics2d\` do not.
 - Tailwind: \`import "onejs:tailwind"\` once in \`index.ts\`; \`esbuild.config.mjs\` already scans \`.svelte\` files for classes.

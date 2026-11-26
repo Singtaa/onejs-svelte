@@ -25,12 +25,14 @@ describe("tag types", () => {
         expect(r.status).toBe(0)
     })
 
-    it("catch a wrong property type and a wrong event value type", () => {
+    it("catch a wrong property type, a wrong event value type, a camelCase prop's type and an unknown prop", () => {
         const r = check("bad")
         expect(r.status).toBe(1)
         expect(r.errors).toEqual([
             `"App.svelte" 5:8 "Type 'number' is not assignable to type 'string'."`,
             `"App.svelte" 6:34 "Type 'boolean' is not assignable to type 'string'."`,
+            `"App.svelte" 7:9 "Type 'string' is not assignable to type 'number'."`,
+            `"App.svelte" 8:9 "Object literal may only specify known properties, and '\\"notaprop\\"' does not exist in type 'Checked<TextAttributes>'."`,
         ])
     })
 })

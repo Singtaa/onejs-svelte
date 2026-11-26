@@ -62,8 +62,15 @@ Runes, components and their `bind:` props, `{#if}`, keyed `{#each}`,
 classes (`import "onejs:tailwind"` once in `index.ts`, as in a React app), and hot reload (state resets; `$effect` cleanups run).
 
 Tags are onejs-react's without `ojs-`: `view`, `text`, `label`, `button`,
-`textfield`, `toggle`, `slider`, `scrollview`, `image`, `listview`, `treeview`,
-`frostedglass`, and any tag `registerElement` added. An event attribute is the
+`textfield`, `toggle`, `slider`, `scrollview`, `image` and `frostedglass`, with
+the props onejs-react types for each. A tag `registerElement` added works too,
+with every prop set on its C# element; declare it in
+`svelteHTML.IntrinsicElements` for svelte-check. ListView and TreeView are not
+typed: their rows are React components in onejs-react, so a Svelte list is a
+keyed `{#each}` inside a `<scrollview>`.
+
+A value in quotes is a string and a bare attribute is the empty string, as in
+HTML, so numbers and booleans go in braces: `maxLength={5}`, `multiline={true}`. An event attribute is the
 bridge's event name after `on` (`onclick`, `onpointerdown`, `onchange`); a
 field's `onchange` carries `{ value }`. A `use:` action or an `{@attach}`
 receives the renderer's node, whose `element` is the VisualElement:
