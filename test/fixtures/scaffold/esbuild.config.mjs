@@ -1,0 +1,17 @@
+import { oneJSConfig } from "onejs-unity/esbuild"
+
+// The whole build: index.tsx bundled into ../app.js.txt, where JSRunner reads it.
+// `npm run watch` rebuilds on every save, and Unity hot-reloads the new bundle.
+//
+// A player build runs `npm run build` with NODE_ENV=production, which ships
+// React's production build; the editor keeps the development one, with its warnings.
+// Any esbuild option can be added beside entry, for example alias or define.
+export default oneJSConfig({
+    entry: "index.tsx",
+    // With `import "onejs:tailwind"`, controls start bare, as on the web, so
+    // utilities style them from nothing. Remove this to keep the theme's look.
+    tailwind: { preflight: true },
+    plugins: [
+        // Your own esbuild plugins go here; they run after OneJS's.
+    ],
+})

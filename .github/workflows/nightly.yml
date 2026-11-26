@@ -1,0 +1,56 @@
+# Svelte's custom renderer API is experimental, so a Svelte patch may break it.
+# package.json pins the Svelte this package was tested with; every night this
+# runs the whole suite against svelte@latest instead, so a break shows here
+# before a user meets it. A red run means: re-test, then move the pin, or fix
+# the renderer and release.
+name: Nightly Svelte
+
+on:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+jobs:
+  latest:
+    name: svelte@latest
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: onejs-svelte
+
+    steps:
+      # Checked out into a named folder so the siblings below sit beside it:
+      # onejs-svelte links them through "file:../" dev dependencies, the layout these
+      # packages are developed in inside the OneJS container.
+      - uses: actions/checkout@v4
+        with:
+          path: onejs-svelte
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Singtaa/onejs-elements
+          ref: main
+          path: onejs-elements
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Singtaa/unity-types
+          ref: main
+          path: unity-types
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      - name: Swap in svelte@latest
+        run: |
+          npm install --no-save svelte@latest
+          echo "Pinned: $(node -p "require('./package.json').peerDependencies.svelte")"
+          echo "Testing: $(node -p "require('svelte/package.json').version")"
+
+      - run: npm run typecheck
+
+      - run: npm test
