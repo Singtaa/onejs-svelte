@@ -13,8 +13,8 @@ In a JSRunner's `~` folder, after Initialize Project:
 npx onejs-svelte init
 ```
 
-It swaps the React packages for Svelte's, writes `index.ts`, `App.svelte` and
-`svelte.config.js`, adds the plugin to `esbuild.config.mjs`, points
+It swaps the React packages for Svelte's (and TypeScript 7 for 6, the newest
+svelte-check runs on), writes `index.ts`, `App.svelte` and `svelte.config.js`, adds the plugin to `esbuild.config.mjs`, points
 `tsconfig.json` at the UI Toolkit tag types, runs `npm install` and the first
 build. A file you changed after OneJS wrote it is left alone, and init prints
 what to change by hand. By hand, the whole setup is:
