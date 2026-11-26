@@ -135,7 +135,10 @@ export function init(dir, { log = console.log } = {}) {
         for (const name of REACT_PACKAGES) if (pkg[field]?.[name]) delete pkg[field][name]
     }
     pkg.dependencies = { ...pkg.dependencies, "onejs-svelte": `^${own.version}`, svelte: own.peerDependencies.svelte }
-    pkg.devDependencies = { ...pkg.devDependencies, "svelte-check": own.devDependencies["svelte-check"] }
+    // The template's TypeScript 7 has no compiler API for svelte-check, which takes 5 or 6.
+    // This package is installed and tested with the TypeScript it gives the app, so npm ci
+    // here fails the day the two ranges stop meeting.
+    pkg.devDependencies = { ...pkg.devDependencies, "svelte-check": own.devDependencies["svelte-check"], typescript: own.devDependencies.typescript }
     pkg.scripts = { ...pkg.scripts, typecheck: "svelte-check --tsconfig ./tsconfig.json" }
     fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n")
     changed.push("package.json")

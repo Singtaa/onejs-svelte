@@ -50,6 +50,15 @@ describe("init on a fresh scaffold", () => {
         expect(pkg.scripts.typecheck).toMatch(/^svelte-check/)
     })
 
+    it("gives the app the TypeScript svelte-check takes, in place of the template's 7", () => {
+        expect(json(dir, "package.json").devDependencies.typescript).toBe("^7.0.0")
+        init(dir, quiet)
+        const own = json(path.join(here, ".."), "package.json")
+        expect(json(dir, "package.json").devDependencies.typescript).toBe(own.devDependencies.typescript)
+        const peer = json(path.join(here, "..", "node_modules", "svelte-check"), "package.json").peerDependencies.typescript
+        expect(peer).toContain(`^${own.devDependencies.typescript.match(/\d+/)[0]}.`)
+    })
+
     it("replaces index.tsx with index.ts and App.svelte", () => {
         init(dir, quiet)
         expect(fs.existsSync(path.join(dir, "index.tsx"))).toBe(false)
