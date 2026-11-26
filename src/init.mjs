@@ -88,7 +88,7 @@ const AGENTS_SECTION = `
 - Svelte refuses these under OneJS: \`bind:\` on an element (\`bind:this\` too), \`transition:\`, \`animate:\`, \`on:click\`, \`{@html}\`, \`<svelte:window>\`. \`bind:\` on a component prop works.
 - onejs-unity's \`.\`, \`input\`, \`gpu\`, \`fx\` and \`proc\` need React; \`assets\`, \`audio\`, \`interop\`, \`sl\` and \`physics2d\` do not.
 - Tailwind: \`import "onejs:tailwind"\` once in \`index.ts\`; \`esbuild.config.mjs\` already scans \`.svelte\` files for classes.
-- \`npm run typecheck\` runs svelte-check.
+- \`npm run typecheck\` runs svelte-check, which reads the tags from \`tsconfig.json\`'s \`"svelteOptions": { "namespace": "svelteOneJS" }\` and \`onejs-svelte/elements\` in \`types\`. Keep both.
 `
 
 const AGENTS_MARKER = "## This app is Svelte, not React"
@@ -193,10 +193,12 @@ export function init(dir, { log = console.log } = {}) {
             const types = (o.types ?? []).filter((t) => t !== "react")
             for (const t of ["svelte", "onejs-svelte/elements"]) if (!types.includes(t)) types.push(t)
             o.types = types
+            // svelte-check and the editor extension read the tags from this namespace
+            ts.svelteOptions = { ...ts.svelteOptions, namespace: "svelteOneJS" }
             fs.writeFileSync(tsPath, JSON.stringify(ts, null, 2) + "\n")
             changed.push("tsconfig.json")
         } catch {
-            manual.push(`tsconfig.json could not be read as JSON, so it stays. In compilerOptions, drop "jsx", and make "types" include "svelte" and "onejs-svelte/elements" instead of "react".`)
+            manual.push(`tsconfig.json could not be read as JSON, so it stays. In compilerOptions, drop "jsx", and make "types" include "svelte" and "onejs-svelte/elements" instead of "react". Beside compilerOptions, add "svelteOptions": { "namespace": "svelteOneJS" }.`)
         }
     }
 

@@ -1,10 +1,13 @@
 // Builds a fixture app with the real sveltePlugin and runs its bundle against
 // onejs-elements' UI Toolkit mocks, the way JSRunner runs it in QuickJS.
+import fs from "node:fs"
+import os from "node:os"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import * as esbuild from "esbuild"
 import { installMockRuntime, createMockContainer, getCreatedElements, flushMicrotasks, type MockVisualElement } from "onejs-elements/testing"
 import { sveltePlugin } from "../src/esbuild.mjs"
+import { scaffoldHash } from "../src/init.mjs"
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 
@@ -86,4 +89,23 @@ export function isAttached(el: MockVisualElement, root: MockVisualElement): bool
         p = (p as any)._parent ?? null
     }
     return false
+}
+
+const TEMPLATE_FILES = ["package.json", "tsconfig.json", "esbuild.config.mjs", "index.tsx", "AGENTS.md"]
+
+/**
+ * A ~ folder as Initialize Project leaves it: the templates, and the record
+ * JSRunner keeps. In `parent` when it must resolve this package's node_modules.
+ */
+export function scaffold(parent = os.tmpdir()): string {
+    const dir = fs.mkdtempSync(path.join(parent, "onejs-svelte-init-"))
+    const lines: string[] = []
+    for (const f of TEMPLATE_FILES) {
+        const text = fs.readFileSync(path.join(here, "fixtures", "scaffold", f), "utf8")
+        fs.writeFileSync(path.join(dir, f), text)
+        lines.push(`${f}\t${scaffoldHash(text)}`)
+    }
+    fs.mkdirSync(path.join(dir, ".onejs"))
+    fs.writeFileSync(path.join(dir, ".onejs", "scaffold"), lines.sort().join("\n") + "\n")
+    return dir
 }

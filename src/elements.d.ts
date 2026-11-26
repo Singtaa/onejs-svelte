@@ -1,6 +1,11 @@
 // The UI Toolkit tags for Svelte's type checker (svelte-check, the editor
-// extension). Without this, Svelte reads <label> and <button> as HTML's.
-// Name it in tsconfig.json: "types": ["svelte", "onejs-svelte/elements"].
+// extension), in a namespace of their own as Svelte Native's are. Merged into
+// Svelte's svelteHTML instead, <label> and <button> would keep HTML's types:
+// two declarations of one interface member do not merge, and the first loaded
+// wins. tsconfig.json names both, as init writes it:
+//
+//     "compilerOptions": { "types": ["svelte", "onejs-svelte/elements"] },
+//     "svelteOptions": { "namespace": "svelteOneJS" }
 //
 // An event attribute is the bridge's event name with "on" in front
 // (onclick, onpointerdown, onchange); its argument is the data the bridge
@@ -76,9 +81,35 @@ type Checked<T> = { [K in keyof T as Lowercase<K & string>]: T[K] }
 type Visibility = "Auto" | "AlwaysVisible" | "Hidden"
 type Rect = { x: number; y: number; width: number; height: number }
 
+/** What a use: action or an {@attach} receives: the renderer's node for the element. */
+interface OneJSNode {
+    readonly element: CS.UnityEngine.UIElements.VisualElement
+}
+
+// Accepted as Svelte accepts them; the compiler refuses svelte:window and the
+// other DOM-only ones under a custom renderer, so they are not here either.
+type SvelteSpecial = Record<string, unknown>
+
 declare global {
-    namespace svelteHTML {
+    namespace svelteOneJS {
+        // The two functions every typings namespace implements: svelte-check
+        // writes each tag as a createElement call, and an action's node as mapElementTag's.
+        function mapElementTag(tag: string): OneJSNode
+        function createElement<Elements extends IntrinsicElements, Key extends keyof Elements>(
+            element: Key | undefined | null,
+            attrs: string extends Key ? OneJSElementAttributes : Elements[Key]
+        ): OneJSNode
+        function createElement<Elements extends IntrinsicElements, Key extends keyof Elements, T>(
+            element: Key | undefined | null,
+            attrsEnhancers: T,
+            attrs: (string extends Key ? OneJSElementAttributes : Elements[Key]) & T
+        ): OneJSNode
+
         interface IntrinsicElements {
+            "svelte:options": SvelteSpecial
+            "svelte:boundary": SvelteSpecial
+            "svelte:fragment": SvelteSpecial
+
             view: Checked<OneJSElementAttributes>
             text: Checked<TextAttributes>
             label: Checked<TextAttributes>

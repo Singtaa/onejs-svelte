@@ -4,27 +4,12 @@ import path from "node:path"
 import { spawnSync } from "node:child_process"
 import { fileURLToPath } from "node:url"
 import { getCreatedElements } from "onejs-elements/testing"
-import { init, scaffoldHash } from "../src/init.mjs"
-import { buildDir, runBundle } from "./harness"
+import { init } from "../src/init.mjs"
+import { buildDir, runBundle, scaffold } from "./harness"
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 fs.mkdirSync(path.join(here, "out"), { recursive: true })
-const TEMPLATE_FILES = ["package.json", "tsconfig.json", "esbuild.config.mjs", "index.tsx", "AGENTS.md"]
 const quiet = { log: () => {} }
-
-// A ~ folder as Initialize Project leaves it: the templates, and the record JSRunner keeps
-function scaffold(): string {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "onejs-svelte-init-"))
-    const lines: string[] = []
-    for (const f of TEMPLATE_FILES) {
-        const text = fs.readFileSync(path.join(here, "fixtures", "scaffold", f), "utf8")
-        fs.writeFileSync(path.join(dir, f), text)
-        lines.push(`${f}\t${scaffoldHash(text)}`)
-    }
-    fs.mkdirSync(path.join(dir, ".onejs"))
-    fs.writeFileSync(path.join(dir, ".onejs", "scaffold"), lines.sort().join("\n") + "\n")
-    return dir
-}
 
 const read = (dir: string, f: string) => fs.readFileSync(path.join(dir, f), "utf8")
 const json = (dir: string, f: string) => JSON.parse(read(dir, f))
@@ -81,6 +66,7 @@ describe("init on a fresh scaffold", () => {
         expect(o.jsx).toBeUndefined()
         expect(o.paths).toBeUndefined()
         expect(o.types).toEqual(["unity-types", "onejs-unity/globals", "svelte", "onejs-svelte/elements"])
+        expect(json(dir, "tsconfig.json").svelteOptions).toEqual({ namespace: "svelteOneJS" })
     })
 
     it("adds a Svelte section to AGENTS.md", () => {
