@@ -89,5 +89,10 @@ jobs:
 
       - run: npm test
 
+      # No --provenance and no token: npm finds the OIDC environment and attaches
+      # provenance by itself for a public package from a public repo. The trusted
+      # publisher on npmjs.com must allow "npm publish": an entry made since
+      # 3 September 2026 allows only "npm stage publish" unless direct publishing
+      # is ticked, and this step then fails with E_STAGE_REQUIRED.
       - run: npm publish
         if: steps.registry.outputs.published != 'true'
