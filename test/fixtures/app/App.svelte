@@ -21,7 +21,11 @@
     const p = new Promise<string>((r) => { resolve = r })
     ;(globalThis as any).__resolveAwait = (v: string) => resolve(v)
     const store = writable(10)
+    const tip = (node: any, text: string) => { node.element.tooltip = text }
+    const mark = (node: any) => { node.element.AddToClassList("attached") }
 </script>
+
+{#snippet badge(t: string)}<label name="snippet" text={`snippet ${t}`} />{/snippet}
 
 <view class="panel" name="panel">
     <button name="inc" text={`count ${count}`} onclick={() => count++} />
@@ -46,6 +50,8 @@
     <view name="cls" class:active={count > 3} />
     <view name="sty" style:width={`${10 + count}px`} style="height: 7px" />
     <label name="interp">Count is {count}</label>
+    <view name="action" use:tip={"from action"} {@attach mark} />
+    {@render badge("ok")}
 </view>
 
 <style>

@@ -14,10 +14,16 @@ declare const __eventAPI: {
 
 type Kind = "fragment" | "element" | "text" | "comment"
 
+/**
+ * The renderer's node. A `use:` action or an `{@attach}` receives one: its
+ * `element` is the UI Toolkit VisualElement (or TextElement for text).
+ */
 export interface Node {
     kind: Kind
     parent: Node | null
     children: Node[]
+    /** The C# element, for an element or text node */
+    element?: any
     inst?: Instance
     data?: string
     attrs?: Map<string, unknown>
@@ -101,17 +107,20 @@ export function rootNode(container: unknown): Node {
         eventHandlers: new Map(),
         appliedStyle: new Map(),
     } as unknown as Instance
-    return make("element", { inst, attrs: new Map() })
+    return make("element", { inst, element: container, attrs: new Map() })
 }
 
 const renderer = createRenderer<{ fragment: Node; element: Node; text: Node; comment: Node }>({
     createFragment: () => make("fragment"),
     // <label> is onejs-elements' ojs-label; a tag registerElement added is ojs-<tag>
-    createElement: (name) => make("element", {
-        inst: hostConfig.createInstance(`ojs-${name}`, {} as any),
-        attrs: new Map(),
-    }),
-    createText: (data) => make("text", { inst: hostConfig.createTextInstance(data) }),
+    createElement: (name) => {
+        const inst = hostConfig.createInstance(`ojs-${name}`, {} as any)
+        return make("element", { inst, element: inst.element, attrs: new Map() })
+    },
+    createText: (data) => {
+        const inst = hostConfig.createTextInstance(data)
+        return make("text", { inst, element: inst.element })
+    },
     createComment: (data) => make("comment", { data }),
 
     getNodeType: (n) => n.kind,

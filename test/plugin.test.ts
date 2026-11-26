@@ -1,4 +1,9 @@
-import { buildFixture } from "./harness"
+import fs from "node:fs"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
+import { buildDir, buildFixture } from "./harness"
+
+const here = path.dirname(fileURLToPath(import.meta.url))
 
 describe("sveltePlugin", () => {
     it("bundles no React: only Svelte and its dependencies, onejs-elements, onejs-svelte and the app", async () => {
@@ -23,6 +28,25 @@ describe("sveltePlugin", () => {
         const prod = await buildFixture("app", { dev: false })
         expect(Object.keys(dev.metafile.inputs).some((p) => p.includes("esm-env/dev-browser") || p.includes("esm-env/true"))).toBe(true)
         expect(dev.code.length).toBeGreaterThan(prod.code.length)
+    })
+
+    it("bundles the app's Svelte only, when onejs-svelte is linked with a Svelte of its own", async () => {
+        fs.mkdirSync(path.join(here, "out"), { recursive: true })
+        const dir = fs.mkdtempSync(path.join(here, "out", "linked-"))
+        try {
+            fs.cpSync(path.join(here, "fixtures", "app"), dir, { recursive: true })
+            fs.writeFileSync(path.join(dir, "package.json"), `{ "name": "linked-app", "private": true, "type": "module" }`)
+            fs.mkdirSync(path.join(dir, "node_modules"))
+            // The app's own copy; the linked onejs-svelte resolves to this package, with its own
+            fs.cpSync(path.join(here, "..", "node_modules", "svelte"), path.join(dir, "node_modules", "svelte"), { recursive: true })
+            fs.symlinkSync(path.join(here, ".."), path.join(dir, "node_modules", "onejs-svelte"), "junction")
+            const { metafile } = await buildDir(dir)
+            const svelteFiles = Object.keys(metafile.inputs).filter((p) => /node_modules\/svelte\//.test(p))
+            expect(svelteFiles.length).toBeGreaterThan(0)
+            expect(svelteFiles.filter((p) => !p.startsWith("node_modules/svelte/"))).toEqual([])
+        } finally {
+            fs.rmSync(dir, { recursive: true, force: true })
+        }
     })
 
     it("drops Svelte's HTML-only warnings", async () => {

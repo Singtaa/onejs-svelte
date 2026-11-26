@@ -92,6 +92,16 @@ describe("render", () => {
         expect(cls.ClassListContains(scopeClass())).toBe(true)
     })
 
+    it("hands a use: action and an {@attach} the node, whose element is the VisualElement", () => {
+        const el = app.byName("action")
+        expect(el.tooltip).toBe("from action")
+        expect(el.ClassListContains("attached")).toBe(true)
+    })
+
+    it("renders a snippet", () => {
+        expect(text("snippet")).toBe("snippet ok")
+    })
+
     it("registers each component's scoped style as USS, keyed by file", () => {
         expect(app.sheets).toHaveLength(1)
         const [css, name] = app.sheets[0]

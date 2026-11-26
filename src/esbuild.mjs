@@ -6,7 +6,8 @@
  *   export default oneJSConfig({ entry: "index.ts", plugins: [sveltePlugin()] })
  *
  * It compiles each component against onejs-svelte's renderer, resolves Svelte's
- * custom-renderer build, and registers each component's scoped <style> as USS.
+ * custom-renderer build (always the app's copy of Svelte), and registers each
+ * component's scoped <style> as USS.
  * The editor gets Svelte's development build, with its warnings; a player build
  * (NODE_ENV=production, as OneJS builds one) gets the production one.
  */
@@ -46,6 +47,16 @@ export function sveltePlugin(options = {}) {
             o.conditions = [...new Set([...(o.conditions ?? []), ...conditions])]
             o.resolveExtensions = [...new Set([...(o.resolveExtensions ?? [".tsx", ".ts", ".jsx", ".js", ".css", ".json"]), ".svelte"])]
             const root = o.absWorkingDir ?? process.cwd()
+
+            // One Svelte, the app's: a linked onejs-svelte (npm link, file:, a
+            // workspace) would otherwise bundle its own copy beside the app's,
+            // and two Svelte runtimes do not share state. oneJSConfig does the
+            // same for React.
+            build.onResolve({ filter: /^svelte(\/.*)?$/ }, async (args) => {
+                if (args.pluginData?.fromApp) return undefined
+                const r = await build.resolve(args.path, { kind: args.kind, resolveDir: root, pluginData: { fromApp: true } })
+                return r.errors.length ? undefined : r
+            })
 
             build.onLoad({ filter: /\.svelte$/ }, async (args) => {
                 const source = await fs.promises.readFile(args.path, "utf8")

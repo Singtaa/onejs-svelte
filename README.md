@@ -65,7 +65,16 @@ Tags are onejs-react's without `ojs-`: `view`, `text`, `label`, `button`,
 `textfield`, `toggle`, `slider`, `scrollview`, `image`, `listview`, `treeview`,
 `frostedglass`, and any tag `registerElement` added. An event attribute is the
 bridge's event name after `on` (`onclick`, `onpointerdown`, `onchange`); a
-field's `onchange` carries `{ value }`.
+field's `onchange` carries `{ value }`. A `use:` action or an `{@attach}`
+receives the renderer's node, whose `element` is the VisualElement:
+
+```svelte
+<script>
+    const focus = (node) => { node.element.Focus() }
+</script>
+
+<textfield use:focus />
+```
 
 Svelte refuses these for every custom renderer, as compile errors:
 `bind:` on an element (`bind:value`, `bind:this`), `transition:`, `in:`,
@@ -89,7 +98,7 @@ the suite against `svelte@latest` every night.
 |------|---------|
 | `src/renderer.ts` | Svelte's `Renderer` onto onejs-elements. A JS shadow tree holds Svelte's fragments and comment anchors, which UI Toolkit has no node for; elements and text attach beside their nearest real sibling |
 | `src/index.ts` | `render(App, root, props?)`: mount, and unmount on the context's teardown |
-| `src/esbuild.mjs` | `sveltePlugin()` and `warningFilter`: compile `.svelte` against the renderer, the `svelte-custom-renderer` and (in the editor) `development` conditions, scoped CSS to `compileStyleSheet` |
+| `src/esbuild.mjs` | `sveltePlugin()` and `warningFilter`: compile `.svelte` against the renderer, the `svelte-custom-renderer` and (in the editor) `development` conditions, every `svelte` import from the app's own copy, scoped CSS to `compileStyleSheet` |
 | `src/elements.d.ts` | `svelteHTML.IntrinsicElements` for the UI Toolkit tags, so svelte-check types them (`"types": ["svelte", "onejs-svelte/elements"]`) |
 | `src/init.mjs`, `src/cli.mjs` | `npx onejs-svelte init` |
 
