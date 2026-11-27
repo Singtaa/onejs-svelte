@@ -33,6 +33,9 @@ describe("init on a fresh scaffold", () => {
         expect(pkg.dependencies["onejs-unity"]).toBeDefined()
         expect(pkg.scripts.build).toBe("onejs-unity build")
         expect(pkg.scripts.typecheck).toMatch(/^svelte-check/)
+        // The template's notes about linking onejs-react and typing its reconciler go with React.
+        expect(pkg["//note"]).toBeUndefined()
+        expect(pkg["//types-note"]).toBeUndefined()
     })
 
     it("gives the app the TypeScript svelte-check takes, in place of the template's 7", () => {
@@ -69,9 +72,12 @@ describe("init on a fresh scaffold", () => {
         expect(json(dir, "tsconfig.json").svelteOptions).toEqual({ namespace: "svelteOneJS" })
     })
 
-    it("adds a Svelte section to AGENTS.md", () => {
+    it("adds a Svelte section to AGENTS.md, before the React rules", () => {
         init(dir, quiet)
-        expect(read(dir, "AGENTS.md")).toContain("## This app is Svelte, not React")
+        const agents = read(dir, "AGENTS.md")
+        expect(agents.startsWith("# OneJS App: Agent Guide\n")).toBe(true)
+        expect(agents.indexOf("## This app is Svelte, not React")).toBeGreaterThan(0)
+        expect(agents.indexOf("## This app is Svelte, not React")).toBeLessThan(agents.indexOf("## Commands"))
     })
 
     it("changes nothing more on a second run", () => {

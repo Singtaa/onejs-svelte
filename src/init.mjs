@@ -76,10 +76,9 @@ export default oneJSConfig({
 })
 `
 
-const AGENTS_SECTION = `
-## This app is Svelte, not React
+const AGENTS_SECTION = `## This app is Svelte, not React
 
-\`npx onejs-svelte init\` made it a Svelte 5 app, so the React rules above do not apply here.
+\`npx onejs-svelte init\` made it a Svelte 5 app. Where the React rules below disagree with this section, this section holds.
 
 - The entry is \`index.ts\`, ending with \`render(App, __root)\` from \`onejs-svelte\`. Components are \`.svelte\` files.
 - \`esbuild.config.mjs\` keeps \`sveltePlugin()\` from \`onejs-svelte/esbuild\` in its plugins.
@@ -140,6 +139,8 @@ export function init(dir, { log = console.log } = {}) {
     // here fails the day the two ranges stop meeting.
     pkg.devDependencies = { ...pkg.devDependencies, "svelte-check": own.devDependencies["svelte-check"], typescript: own.devDependencies.typescript }
     pkg.scripts = { ...pkg.scripts, typecheck: "svelte-check --tsconfig ./tsconfig.json" }
+    // The template's notes are about linking onejs-react and typing its reconciler.
+    for (const note of ["//note", "//types-note"]) if (typeof pkg[note] === "string" && /react/i.test(pkg[note])) delete pkg[note]
     fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n")
     changed.push("package.json")
 
@@ -206,8 +207,11 @@ export function init(dir, { log = console.log } = {}) {
     const agentsPath = path.join(dir, "AGENTS.md")
     if (fs.existsSync(agentsPath) && !fs.readFileSync(agentsPath, "utf8").includes(AGENTS_MARKER)) {
         if (untouched(dir, record, "AGENTS.md")) {
-            fs.appendFileSync(agentsPath, AGENTS_SECTION)
-            changed.push("AGENTS.md (a Svelte section added)")
+            // Before the React rules, where a reader reading from the top meets it first.
+            const text = fs.readFileSync(agentsPath, "utf8")
+            const at = text.search(/^## /m)
+            fs.writeFileSync(agentsPath, at < 0 ? `${text.trimEnd()}\n\n${AGENTS_SECTION}` : `${text.slice(0, at)}${AGENTS_SECTION}\n${text.slice(at)}`)
+            changed.push("AGENTS.md (a Svelte section added at the top)")
         } else {
             manual.push("AGENTS.md has your changes, so it stays. Its rules are React's: tell your agent the entry is index.ts with render(App, __root) from onejs-svelte.")
         }
