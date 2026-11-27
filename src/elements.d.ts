@@ -134,7 +134,7 @@ declare global {
                 nestedInteractionKind?: "Default" | "StopScrolling" | "ForwardScrolling"
             }>
             image: Checked<OneJSElementAttributes & {
-                src?: string; image?: object; sprite?: object
+                image?: object; sprite?: object; vectorImage?: object
                 scaleMode?: "StretchToFill" | "ScaleAndCrop" | "ScaleToFit"; tintColor?: string
                 sourceRect?: Rect; uv?: Rect
             }>

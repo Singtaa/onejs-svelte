@@ -43,7 +43,7 @@ describe("tag types", () => {
         expect(r.status).toBe(0)
     })
 
-    it("catch a wrong property type, a wrong event value type, a camelCase prop's type, an unknown prop, an HTML tag and an HTML action", () => {
+    it("catch a wrong property type, a wrong event value type, a camelCase prop's type, an unknown prop, an HTML tag, an HTML action and the image src that only onejs-react's component reads", () => {
         const r = check("bad")
         expect(r.status).toBe(1)
         expect(r.errors).toEqual([
@@ -53,6 +53,9 @@ describe("tag types", () => {
             `"App.svelte" 9:9 "Object literal may only specify known properties, and '\\"notaprop\\"' does not exist in type 'Checked<TextAttributes>'."`,
             `"App.svelte" 10:1 "Argument of type '\\"div\\"' is not assignable to parameter of type 'keyof IntrinsicElements | null | undefined'."`,
             `"App.svelte" 11:20 "Argument of type 'OneJSNode' is not assignable to parameter of type 'HTMLInputElement'.`,
+            // onejs-react's <Image src> loads a file; the tag takes the loaded image, so src would be set and ignored.
+            // The message spells out the whole tag type, so only its start is held.
+            expect.stringMatching(/^"App\.svelte" 12:8 "Object literal may only specify known properties, and '\\"src\\"' does not exist in type 'Checked<OneJSElementAttributes & \{ image\?/),
         ])
     })
 })

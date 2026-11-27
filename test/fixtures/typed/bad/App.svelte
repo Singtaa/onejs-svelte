@@ -9,3 +9,4 @@
 <button notAProp={1} />
 <div class="web"></div>
 <textfield use:html />
+<image src="hero.png" />
