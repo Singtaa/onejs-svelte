@@ -32,7 +32,7 @@ const APP_SVELTE = `<script lang="ts">
 
 <view class="app">
     <label class="title" text="Hello from Svelte" />
-    <button text={\`Clicked \${count} times\`} onclick={() => count++} />
+    <button class="counter" text={\`Clicked \${count} times\`} onclick={() => count++} />
 </view>
 
 <style>
@@ -45,6 +45,22 @@ const APP_SVELTE = `<script lang="ts">
         font-size: 28px;
         color: white;
         margin-bottom: 12px;
+    }
+    /* Styled here: the default theme's button text is small and hard to read on hover */
+    .counter {
+        align-self: flex-start;
+        font-size: 20px;
+        color: white;
+        background-color: rgb(233, 69, 96);
+        border-width: 0;
+        border-radius: 8px;
+        padding: 10px 20px;
+    }
+    .counter:hover {
+        background-color: rgb(255, 107, 107);
+    }
+    .counter:active {
+        background-color: rgb(199, 62, 84);
     }
 </style>
 `
