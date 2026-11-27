@@ -208,9 +208,12 @@ export function init(dir, { log = console.log } = {}) {
     if (fs.existsSync(agentsPath) && !fs.readFileSync(agentsPath, "utf8").includes(AGENTS_MARKER)) {
         if (untouched(dir, record, "AGENTS.md")) {
             // Before the React rules, where a reader reading from the top meets it first.
+            // In the file's own line endings: a Windows checkout has CRLF.
             const text = fs.readFileSync(agentsPath, "utf8")
+            const eol = text.includes("\r\n") ? "\r\n" : "\n"
+            const section = AGENTS_SECTION.replace(/\n/g, eol)
             const at = text.search(/^## /m)
-            fs.writeFileSync(agentsPath, at < 0 ? `${text.trimEnd()}\n\n${AGENTS_SECTION}` : `${text.slice(0, at)}${AGENTS_SECTION}\n${text.slice(at)}`)
+            fs.writeFileSync(agentsPath, at < 0 ? `${text.trimEnd()}${eol}${eol}${section}` : `${text.slice(0, at)}${section}${eol}${text.slice(at)}`)
             changed.push("AGENTS.md (a Svelte section added at the top)")
         } else {
             manual.push("AGENTS.md has your changes, so it stays. Its rules are React's: tell your agent the entry is index.ts with render(App, __root) from onejs-svelte.")

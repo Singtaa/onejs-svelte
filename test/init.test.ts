@@ -75,9 +75,19 @@ describe("init on a fresh scaffold", () => {
     it("adds a Svelte section to AGENTS.md, before the React rules", () => {
         init(dir, quiet)
         const agents = read(dir, "AGENTS.md")
-        expect(agents.startsWith("# OneJS App: Agent Guide\n")).toBe(true)
+        expect(agents.startsWith("# OneJS App: Agent Guide")).toBe(true)
         expect(agents.indexOf("## This app is Svelte, not React")).toBeGreaterThan(0)
         expect(agents.indexOf("## This app is Svelte, not React")).toBeLessThan(agents.indexOf("## Commands"))
+    })
+
+    it("writes the Svelte section in AGENTS.md's own line endings", () => {
+        // A Windows checkout writes the template with CRLF; the scaffold record's hash ignores that.
+        const agentsPath = path.join(dir, "AGENTS.md")
+        fs.writeFileSync(agentsPath, read(dir, "AGENTS.md").replace(/\r?\n/g, "\r\n"))
+        init(dir, quiet)
+        const agents = read(dir, "AGENTS.md")
+        expect(agents).toContain("## This app is Svelte, not React\r\n")
+        expect(agents.replace(/\r\n/g, "")).not.toContain("\n")
     })
 
     it("changes nothing more on a second run", () => {
