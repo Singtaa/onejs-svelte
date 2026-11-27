@@ -89,11 +89,31 @@ export function sveltePlugin(options = {}) {
     }
 }
 
+/**
+ * What to write instead of a feature Svelte refuses under a custom renderer, keyed by the
+ * name its incompatible_with_custom_renderer error gives. Svelte says only that the feature
+ * is not compatible; these say what does the job here.
+ */
+const FADE = "For a fade or a slide, keep the element and toggle a class: on it, with a USS transition in its <style>: .box { transition-property: opacity; transition-duration: 0.3s; } .hidden { opacity: 0; }. An element that {#if} removes goes at once."
+const INSTEAD = {
+    "`bind:`": "On a field, write value={v} onchange={(e) => v = e.value}. For the element itself, use an action: use:fn receives the node, whose element is the VisualElement. bind: on a component's prop works.",
+    "`on:`": "Write the event as an attribute: onclick={...}, onchange={...}, onpointerdown={...}.",
+    // Checked in Unity: a class: toggle eased opacity from 1 to 0 over the USS transition's duration.
+    "`transition:`": FADE,
+    "`in:`": FADE,
+    "`out:`": FADE,
+}
+
 function toMessage(e, file, source) {
     const start = e.start
     const lineText = start ? source.split("\n")[start.line - 1] : undefined
+    const text = (e.message ?? String(e)).split("\n")[0]
+    const instead = e.code === "incompatible_with_custom_renderer"
+        ? Object.entries(INSTEAD).find(([name]) => text.startsWith(name))?.[1]
+        : undefined
     return {
-        text: (e.message ?? String(e)).split("\n")[0],
+        text,
         location: start ? { file, line: start.line, column: start.column, lineText } : { file },
+        notes: instead ? [{ text: instead }] : [],
     }
 }

@@ -117,7 +117,10 @@ Svelte refuses these for every custom renderer, as compile errors:
 `bind:` on an element (`bind:value`, `bind:this`), `transition:`, `in:`,
 `out:`, `animate:`, `on:click`, `{@html}`, and `<svelte:window>`, `<svelte:head>`,
 `<svelte:body>`, `<svelte:document>`. Two-way binding on a field is
-`value={v} onchange={(e) => v = e.value}`.
+`value={v} onchange={(e) => v = e.value}`. A fade or a slide is a USS
+transition: keep the element, toggle a `class:` on it, and give it
+`transition-property` and `transition-duration` in its `<style>`. The build's
+error for each refused feature says what to write instead.
 
 onejs-unity's `assets`, `audio`, `interop`, `sl` and `physics2d` work. Its
 `.`, `input`, `gpu`, `fx` and `proc` are React hooks and need React.

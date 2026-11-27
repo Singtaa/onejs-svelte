@@ -56,6 +56,43 @@ describe("sveltePlugin", () => {
         }
     })
 
+    describe("names what to write instead of what Svelte refuses", () => {
+        const refused = async (markup: string) => {
+            const dir = fs.mkdtempSync(path.join(here, "out", "refused-"))
+            try {
+                fs.writeFileSync(path.join(dir, "index.ts"), `import { render } from "onejs-svelte"\nimport App from "./App.svelte"\nrender(App, __root)\n`)
+                fs.writeFileSync(path.join(dir, "App.svelte"), `<script lang="ts">\n    let v = $state("")\n    const go = () => {}\n</script>\n\n${markup}\n`)
+                await buildDir(dir)
+                throw new Error("built")
+            } catch (e: any) {
+                if (!e.errors) throw e
+                return e.errors[0] as { text: string, notes: { text: string }[] }
+            } finally {
+                fs.rmSync(dir, { recursive: true, force: true })
+            }
+        }
+
+        it("bind:value on a field", async () => {
+            const error = await refused(`<textfield bind:value={v} />`)
+            expect(error.text).toContain("`bind:` is not compatible with `customRenderer`")
+            expect(error.notes.map((n) => n.text).join("\n")).toContain("value={v} onchange={(e) => v = e.value}")
+        })
+
+        it("transition:, in: and out:", async () => {
+            for (const directive of ["transition", "in", "out"]) {
+                const error = await refused(`<script lang="ts" module>import { fade } from "svelte/transition"</script>\n<label text="Hi" ${directive}:fade />`)
+                expect(error.text).toContain(`\`${directive}:\` is not compatible with \`customRenderer\``)
+                expect(error.notes.map((n) => n.text).join("\n")).toContain("transition-property: opacity")
+            }
+        })
+
+        it("on:click", async () => {
+            const error = await refused(`<button text="Go" on:click={go} />`)
+            expect(error.text).toContain("`on:` is not compatible with `customRenderer`")
+            expect(error.notes.map((n) => n.text).join("\n")).toContain("onclick={...}")
+        })
+    })
+
     it("drops Svelte's HTML-only warnings", async () => {
         const { warnings } = await buildFixture("app")
         expect(warnings.filter((w) => /a11y|self-closing/i.test(w.text))).toEqual([])
