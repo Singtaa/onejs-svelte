@@ -7,6 +7,8 @@ onejs-react uses, so a `<label>` here is the `Label` a React app gets.
 
 ## Start
 
+The first release is coming to npm in a few days; until then the commands below have no package to fetch.
+
 In a JSRunner's `~` folder, after Initialize Project:
 
 ```bash
