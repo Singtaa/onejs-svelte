@@ -9,6 +9,12 @@ onejs-react uses, so a `<label>` here is the `Label` a React app gets.
 
 The first release is coming to npm in a few days; until then the commands below have no package to fetch.
 
+New to OneJS? Install it and set up an app first:
+[Quick Start](https://onejs.com/docs/quickstart) in the editor, or
+[AI Agent Setup](https://onejs.com/docs/ai-setup) from a terminal. Initialize
+Project writes the app's `~` folder next to its scene, at
+`Assets/Scenes/<Scene>/<GameObject>/~`.
+
 In a JSRunner's `~` folder, after Initialize Project:
 
 ```bash
@@ -56,6 +62,15 @@ render(App, __root)
 </style>
 ```
 
+### Beside a React app
+
+Each JSRunner is its own app with its own `~` folder, so a project can keep a
+React app and add a Svelte one. Give the Svelte app its own GameObject with a
+JSRunner, click Initialize Project on it, and run init in that runner's `~`
+folder: init changes only the folder it runs in. Both panels draw over the
+whole screen while both GameObjects are enabled, and the one whose
+PanelSettings has the higher Sort Order is on top.
+
 ## What works
 
 Runes, components and their `bind:` props, `{#if}`, keyed `{#each}`,
@@ -70,6 +85,19 @@ with every prop set on its C# element; declare it in
 `svelteOneJS.IntrinsicElements` for svelte-check. ListView and TreeView are not
 typed: their rows are React components in onejs-react, so a Svelte list is a
 keyed `{#each}` inside a `<scrollview>`.
+
+An `<image>` takes the loaded picture, not a path: onejs-react's `<Image src>`
+is a component that loads the file for you, and the tag does not. Load it
+with onejs-unity's `assets`:
+
+```svelte
+<script lang="ts">
+    import { loadImage } from "onejs-unity/assets"
+    const logo = loadImage("logo.png")   // from the app's ~/assets/
+</script>
+
+<image image={logo} />
+```
 
 A value in quotes is a string and a bare attribute is the empty string, as in
 HTML, so numbers and booleans go in braces: `maxLength={5}`, `multiline={true}`. An event attribute is the
